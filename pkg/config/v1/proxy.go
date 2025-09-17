@@ -128,6 +128,7 @@ type ProxyBaseConfig struct {
 	Metadatas    map[string]string  `json:"metadatas,omitempty"`
 	LoadBalancer LoadBalancerConfig `json:"loadBalancer,omitempty"`
 	HealthCheck  HealthCheckConfig  `json:"healthCheck,omitempty"`
+	AllowedAccessIPs []string `json:"allowedAccessIPs,omitempty"`
 	ProxyBackend
 }
 
@@ -174,6 +175,7 @@ func (c *ProxyBaseConfig) MarshalToMsg(m *msg.NewProxy) {
 	m.GroupKey = c.LoadBalancer.GroupKey
 	m.Metas = c.Metadatas
 	m.Annotations = c.Annotations
+	m.AllowedAccessIPs = c.AllowedAccessIPs
 }
 
 func (c *ProxyBaseConfig) UnmarshalFromMsg(m *msg.NewProxy) {
@@ -191,6 +193,7 @@ func (c *ProxyBaseConfig) UnmarshalFromMsg(m *msg.NewProxy) {
 	c.LoadBalancer.GroupKey = m.GroupKey
 	c.Metadatas = m.Metas
 	c.Annotations = m.Annotations
+	c.AllowedAccessIPs = m.AllowedAccessIPs
 }
 
 type TypedProxyConfig struct {
