@@ -258,8 +258,8 @@ func TestIPValidator_GetAllowedIPs(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, validator)
 
-			result := validator.GetAllowedIPs()
-			assert.Equal(t, tt.expected, result)
-		})
+		result := validator.GetAllowedIPs()
+		assert.Equal(t, tt.expected, result)
+	})
 	}
 }
