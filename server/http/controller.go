@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/fatedier/frp/pkg/util/log"
 	"github.com/fatedier/frp/pkg/util/version"
 	"github.com/fatedier/frp/server/http/model"
+	"github.com/fatedier/frp/server/ports"
 	"github.com/fatedier/frp/server/proxy"
 	"github.com/fatedier/frp/server/registry"
 )
@@ -38,6 +40,7 @@ type Controller struct {
 	serverCfg      *v1.ServerConfig
 	clientRegistry *registry.ClientRegistry
 	pxyManager     ProxyManager
+	tcpPortManager *ports.Manager
 }
 
 type ProxyManager interface {
@@ -48,11 +51,13 @@ func NewController(
 	serverCfg *v1.ServerConfig,
 	clientRegistry *registry.ClientRegistry,
 	pxyManager ProxyManager,
+	tcpPortManager *ports.Manager,
 ) *Controller {
 	return &Controller{
 		serverCfg:      serverCfg,
 		clientRegistry: clientRegistry,
 		pxyManager:     pxyManager,
+		tcpPortManager: tcpPortManager,
 	}
 }
 
@@ -229,6 +234,27 @@ func (c *Controller) DeleteProxies(ctx *httppkg.Context) (any, error) {
 	cleared, total := mem.StatsCollector.ClearOfflineProxies()
 	log.Infof("cleared [%d] offline proxies, total [%d] proxies", cleared, total)
 	return httppkg.GeneralResponse{Code: 200, Msg: "success"}, nil
+}
+
+// /api/port-status/:port
+func (c *Controller) APIPortStatus(ctx *httppkg.Context) (any, error) {
+	port, err := strconv.Atoi(ctx.Param("port"))
+	if err != nil || port < ports.MinPort || port > ports.MaxPort {
+		return nil, httppkg.NewError(http.StatusBadRequest, "invalid port number")
+	}
+	if c.tcpPortManager == nil {
+		return nil, httppkg.NewError(http.StatusInternalServerError, "tcp port manager unavailable")
+	}
+
+	_, err = c.tcpPortManager.Acquire("temp_check", port)
+	available := err == nil
+	if available {
+		c.tcpPortManager.Release(port)
+	}
+	return model.PortStatusResp{
+		Port:      port,
+		Available: available,
+	}, nil
 }
 
 func (c *Controller) getProxyStatsByType(proxyType string) (proxyInfos []*model.ProxyStatsInfo) {

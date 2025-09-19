@@ -134,3 +134,8 @@ type GetProxyTrafficResp struct {
 	TrafficIn  []int64 `json:"trafficIn"`
 	TrafficOut []int64 `json:"trafficOut"`
 }
+
+type PortStatusResp struct {
+	Port      int  `json:"port"`
+	Available bool `json:"available"`
+}
