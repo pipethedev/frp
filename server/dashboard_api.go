@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"slices"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -54,6 +55,7 @@ func (svr *Service) registerRouteHandlers(helper *httppkg.RouterRegisterHelper) 
 	subRouter.HandleFunc("/api/proxy/{type}/{name}", svr.apiProxyByTypeAndName).Methods("GET")
 	subRouter.HandleFunc("/api/traffic/{name}", svr.apiProxyTraffic).Methods("GET")
 	subRouter.HandleFunc("/api/proxies", svr.deleteProxies).Methods("DELETE")
+	subRouter.HandleFunc("/api/port-status/{port}", svr.apiPortStatus).Methods("GET")
 
 	// view
 	subRouter.Handle("/favicon.ico", http.FileServer(helper.AssetsFS)).Methods("GET")
@@ -352,6 +354,11 @@ type GetProxyTrafficResp struct {
 	TrafficOut []int64 `json:"trafficOut"`
 }
 
+type PortStatusResp struct {
+	Port      int  `json:"port"`
+	Available bool `json:"available"`
+}
+
 func (svr *Service) apiProxyTraffic(w http.ResponseWriter, r *http.Request) {
 	res := GeneralResponse{Code: 200}
 	params := mux.Vars(r)
@@ -403,4 +410,44 @@ func (svr *Service) deleteProxies(w http.ResponseWriter, r *http.Request) {
 	}
 	cleared, total := mem.StatsCollector.ClearOfflineProxies()
 	log.Infof("cleared [%d] offline proxies, total [%d] proxies", cleared, total)
+}
+
+// /api/port-status/{port}
+func (svr *Service) apiPortStatus(w http.ResponseWriter, r *http.Request) {
+	res := GeneralResponse{Code: 200}
+	params := mux.Vars(r)
+
+	defer func() {
+		log.Infof("http response [%s]: code [%d]", r.URL.Path, res.Code)
+		w.WriteHeader(res.Code)
+		if len(res.Msg) > 0 {
+			_, _ = w.Write([]byte(res.Msg))
+		}
+	}()
+	log.Infof("http request: [%s]", r.URL.Path)
+
+	portStr := params["port"]
+	port, err := strconv.Atoi(portStr)
+	if err != nil || port < 1 || port > 65535 {
+		res.Code = 400
+		res.Msg = "invalid port number"
+		return
+	}
+
+	// Try to acquire the specific port to check availability
+	_, err = svr.rc.TCPPortManager.Acquire("temp_check", port)
+	available := err == nil
+
+	// If we successfully acquired it, release it immediately
+	if available {
+		svr.rc.TCPPortManager.Release(port)
+	}
+
+	portResp := PortStatusResp{
+		Port:      port,
+		Available: available,
+	}
+
+	buf, _ := json.Marshal(&portResp)
+	res.Msg = string(buf)
 }
