@@ -50,7 +50,7 @@ func NewIPValidator(allowedClientIPs []string) (*IPValidator, error) {
 			if ip == nil {
 				return nil, fmt.Errorf("invalid IP address: %s", ipStr)
 			}
-			
+
 			var ipNet *net.IPNet
 			if ip.To4() != nil {
 				ipNet = &net.IPNet{IP: ip, Mask: net.CIDRMask(32, 32)}
