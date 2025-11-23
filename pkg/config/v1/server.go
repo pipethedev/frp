@@ -110,7 +110,6 @@ func (c *ServerConfig) Complete() error {
 	}
 	c.Log.Complete()
 	c.Transport.Complete()
-	c.WebServer.Complete()
 	c.SSHTunnelGateway.Complete()
 
 	if c.UseTailscale {
@@ -119,21 +118,18 @@ func (c *ServerConfig) Complete() error {
 			return fmt.Errorf("useTailscale is enabled but failed to get Tailscale IP: %w", err)
 		}
 		c.BindAddr = tailscaleIP
+		if c.WebServer.Port > 0 && c.WebServer.Addr == "" {
+			c.WebServer.Addr = tailscaleIP
+		}
 	} else {
 		c.BindAddr = util.EmptyOr(c.BindAddr, "0.0.0.0")
 	}
 
+	c.WebServer.Complete()
+
 	c.BindPort = util.EmptyOr(c.BindPort, 7000)
 	if c.ProxyBindAddr == "" {
 		c.ProxyBindAddr = c.BindAddr
-	}
-
-	if c.WebServer.Port > 0 {
-		if c.UseTailscale && c.WebServer.Addr == "" {
-			c.WebServer.Addr = c.BindAddr
-		} else {
-			c.WebServer.Addr = util.EmptyOr(c.WebServer.Addr, "0.0.0.0")
-		}
 	}
 
 	c.VhostHTTPTimeout = util.EmptyOr(c.VhostHTTPTimeout, 60)
