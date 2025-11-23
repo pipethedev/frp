@@ -125,10 +125,10 @@ type ProxyBaseConfig struct {
 	Annotations map[string]string `json:"annotations,omitempty"`
 	Transport   ProxyTransport    `json:"transport,omitempty"`
 	// metadata info for each proxy
-	Metadatas    map[string]string  `json:"metadatas,omitempty"`
-	LoadBalancer LoadBalancerConfig `json:"loadBalancer,omitempty"`
-	HealthCheck  HealthCheckConfig  `json:"healthCheck,omitempty"`
-	AllowedAccessIPs []string `json:"allowedAccessIPs,omitempty"`
+	Metadatas        map[string]string  `json:"metadatas,omitempty"`
+	LoadBalancer     LoadBalancerConfig `json:"loadBalancer,omitempty"`
+	HealthCheck      HealthCheckConfig  `json:"healthCheck,omitempty"`
+	AllowedAccessIPs []string           `json:"allowedAccessIPs,omitempty"`
 	ProxyBackend
 }
 

@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	
+
 	"github.com/fatedier/frp/pkg/msg"
 )
 
@@ -84,11 +84,11 @@ func TestProxyConfigWithAllowedAccessIPs(t *testing.T) {
 
 func TestProxyConfigMarshalToMsg(t *testing.T) {
 	require := require.New(t)
-	
+
 	tcpConfig := &TCPProxyConfig{
 		ProxyBaseConfig: ProxyBaseConfig{
-			Name: "test-tcp",
-			Type: "tcp",
+			Name:             "test-tcp",
+			Type:             "tcp",
 			AllowedAccessIPs: []string{"127.0.0.1", "192.168.1.0/24"},
 		},
 		RemotePort: 8080,
@@ -105,11 +105,11 @@ func TestProxyConfigMarshalToMsg(t *testing.T) {
 
 func TestProxyConfigUnmarshalFromMsg(t *testing.T) {
 	require := require.New(t)
-	
+
 	msg := &msg.NewProxy{
-		ProxyName: "test-tcp",
-		ProxyType: "tcp",
-		RemotePort: 8080,
+		ProxyName:        "test-tcp",
+		ProxyType:        "tcp",
+		RemotePort:       8080,
 		AllowedAccessIPs: []string{"127.0.0.1", "192.168.1.0/24"},
 	}
 
