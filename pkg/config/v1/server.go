@@ -21,6 +21,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/fatedier/frp/pkg/config/types"
+	netpkg "github.com/fatedier/frp/pkg/util/net"
 	"github.com/fatedier/frp/pkg/util/util"
 )
 
@@ -31,6 +32,11 @@ type ServerConfig struct {
 	// BindAddr specifies the address that the server binds to. By default,
 	// this value is "0.0.0.0".
 	BindAddr string `json:"bindAddr,omitempty"`
+	// UseTailscale specifies whether to automatically use the Tailscale IP address
+	// as the bind address. When enabled, BindAddr will be overridden with the
+	// Tailscale IP address if available. Works in Docker containers when Tailscale
+	// is configured via sidecar, host network, or userspace networking.
+	UseTailscale bool `json:"useTailscale,omitempty"`
 	// BindPort specifies the port that the server listens on. By default, this
 	// value is 7000.
 	BindPort int `json:"bindPort,omitempty"`
@@ -98,7 +104,6 @@ type ServerConfig struct {
 
 	AllowPorts []types.PortsRange `json:"allowPorts,omitempty"`
 
-
 	HTTPPlugins []HTTPPluginOptions `json:"httpPlugins,omitempty"`
 }
 
@@ -111,7 +116,16 @@ func (c *ServerConfig) Complete() error {
 	c.WebServer.Complete()
 	c.SSHTunnelGateway.Complete()
 
-	c.BindAddr = util.EmptyOr(c.BindAddr, "0.0.0.0")
+	if c.UseTailscale {
+		tailscaleIP, err := netpkg.GetTailscaleIP()
+		if err != nil {
+			return fmt.Errorf("useTailscale is enabled but failed to get Tailscale IP: %w", err)
+		}
+		c.BindAddr = tailscaleIP
+	} else {
+		c.BindAddr = util.EmptyOr(c.BindAddr, "0.0.0.0")
+	}
+
 	c.BindPort = util.EmptyOr(c.BindPort, 7000)
 	if c.ProxyBindAddr == "" {
 		c.ProxyBindAddr = c.BindAddr
