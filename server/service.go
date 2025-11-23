@@ -235,6 +235,9 @@ func NewService(cfg *v1.ServerConfig) (*Service, error) {
 	}
 
 	// Listen for accepting connections from client.
+	if cfg.UseTailscale {
+		log.Infof("Tailscale mode enabled, using Tailscale IP: %s", cfg.BindAddr)
+	}
 	address := net.JoinHostPort(cfg.BindAddr, strconv.Itoa(cfg.BindPort))
 	ln, err := net.Listen("tcp", address)
 	if err != nil {

@@ -4,6 +4,13 @@
 # in square brackets, as in "[::1]:80", "[ipv6-host]:http" or "[ipv6-host%zone]:80"
 # For single "bindAddr" field, no need square brackets, like `bindAddr = "::"`.
 bindAddr = "0.0.0.0"
+
+# useTailscale specifies whether to automatically use the Tailscale IP address as bindAddr.
+# When enabled, frps will detect and use the Tailscale IP (100.64.0.0/10 or fd7a:115c:a1e0::/48).
+# This works in Docker containers when Tailscale is configured via sidecar, host network, or userspace mode.
+# If enabled and no Tailscale IP is found, frps will fail to start.
+# useTailscale = false
+
 bindPort = 7000
 
 # udp port used for kcp protocol, it can be same with 'bindPort'.
