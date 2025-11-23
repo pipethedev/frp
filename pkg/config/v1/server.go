@@ -101,7 +101,6 @@ type ServerConfig struct {
 
 	AllowPorts []types.PortsRange `json:"allowPorts,omitempty"`
 
-
 	HTTPPlugins []HTTPPluginOptions `json:"httpPlugins,omitempty"`
 }
 
