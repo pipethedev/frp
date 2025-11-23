@@ -21,7 +21,6 @@ import (
 
 func TestGetTailscaleIP(t *testing.T) {
 	ip, err := GetTailscaleIP()
-
 	if err != nil {
 		t.Logf("No Tailscale IP found (expected if Tailscale is not configured): %v", err)
 		return
