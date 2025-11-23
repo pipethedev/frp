@@ -129,7 +129,11 @@ func (c *ServerConfig) Complete() error {
 	}
 
 	if c.WebServer.Port > 0 {
-		c.WebServer.Addr = util.EmptyOr(c.WebServer.Addr, "0.0.0.0")
+		if c.UseTailscale && c.WebServer.Addr == "" {
+			c.WebServer.Addr = c.BindAddr
+		} else {
+			c.WebServer.Addr = util.EmptyOr(c.WebServer.Addr, "0.0.0.0")
+		}
 	}
 
 	c.VhostHTTPTimeout = util.EmptyOr(c.VhostHTTPTimeout, 60)
