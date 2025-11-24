@@ -838,28 +838,51 @@ allowPorts = [
 
 ### Tailscale Support
 
-frp supports binding to Tailscale IP addresses, allowing you to run frp over your Tailscale network for enhanced security and easy access to machines on your tailnet.
+frp supports automatic detection and binding to Tailscale IP addresses, allowing you to run frp over your Tailscale network for enhanced security and easy access to machines on your tailnet.
 
-You can configure the server to bind to a Tailscale IP:
+#### Automatic Tailscale IP Detection
+
+Enable automatic Tailscale IP detection by setting `useTailscale = true` in your server configuration:
 
 ```toml
 # frps.toml
-# Bind to your Tailscale IP address
-bindAddr = "100.x.x.x"
+# Automatically detect and bind to your Tailscale IP address
+useTailscale = true
 bindPort = 7000
 
-# You can also bind the dashboard to your Tailscale IP
-webServer.addr = "100.x.x.x"
+# Dashboard will also automatically use the Tailscale IP
 webServer.port = 7500
 webServer.user = "admin"
 webServer.password = "admin"
 ```
+
+When `useTailscale` is enabled:
+- frps will automatically detect your Tailscale IP address (from the 100.64.0.0/10 CGNAT range or fd7a:115c:a1e0::/48 for IPv6)
+- The server will bind to this IP address automatically
+- The web dashboard will also use the Tailscale IP if no explicit address is configured
+- Works in Docker containers when Tailscale is configured via sidecar, host network, or userspace networking mode
+
+#### Manual Tailscale IP Configuration
+
+Alternatively, you can manually specify your Tailscale IP address:
+
+```toml
+# frps.toml
+bindAddr = "100.x.x.x"
+bindPort = 7000
+
+webServer.addr = "100.x.x.x"
+webServer.port = 7500
+```
+
+#### Benefits
 
 This allows you to:
 - Keep frp traffic within your private Tailscale network
 - Avoid exposing frp server ports to the public internet
 - Leverage Tailscale's built-in authentication and encryption
 - Access your frp server from any device on your tailnet
+- Automatically adapt to Tailscale IP changes when using `useTailscale = true`
 
 ### Port Reuse
 
