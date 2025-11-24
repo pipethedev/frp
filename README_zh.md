@@ -56,6 +56,8 @@ an API that records Zoom, Google Meet, Microsoft Teams, in-person meetings, and 
 * 多个原生支持的客户端插件（静态文件查看，HTTPS/HTTP 协议转换，HTTP、SOCK5 代理等），便于独立使用 frp 客户端完成某些工作。
 * 高度扩展性的服务端插件系统，易于结合自身需求进行功能扩展。
 * 服务端和客户端 UI 页面。
+* 支持 Tailscale 网络，可以将 frp 服务绑定到 Tailscale IP 地址上。
+* IP 白名单功能，可以限制只有特定 IP 地址才能访问代理的服务。
 
 ## 开发状态
 

@@ -81,6 +81,7 @@ frp also offers a P2P connect mode.
     * [Hot-Reloading frpc configuration](#hot-reloading-frpc-configuration)
     * [Get proxy status from client](#get-proxy-status-from-client)
     * [Only allowing certain ports on the server](#only-allowing-certain-ports-on-the-server)
+    * [Tailscale Support](#tailscale-support)
     * [Port Reuse](#port-reuse)
     * [Bandwidth Limit](#bandwidth-limit)
         * [For Each Proxy](#for-each-proxy)
@@ -99,6 +100,7 @@ frp also offers a P2P connect mode.
     * [Custom Subdomain Names](#custom-subdomain-names)
     * [URL Routing](#url-routing)
     * [TCP Port Multiplexing](#tcp-port-multiplexing)
+    * [IP Whitelist for Proxied Services](#ip-whitelist-for-proxied-services)
     * [Connecting to frps via PROXY](#connecting-to-frps-via-proxy)
     * [Port range mapping](#port-range-mapping)
     * [Client Plugins](#client-plugins)
@@ -834,6 +836,31 @@ allowPorts = [
 ]
 ```
 
+### Tailscale Support
+
+frp supports binding to Tailscale IP addresses, allowing you to run frp over your Tailscale network for enhanced security and easy access to machines on your tailnet.
+
+You can configure the server to bind to a Tailscale IP:
+
+```toml
+# frps.toml
+# Bind to your Tailscale IP address
+bindAddr = "100.x.x.x"
+bindPort = 7000
+
+# You can also bind the dashboard to your Tailscale IP
+webServer.addr = "100.x.x.x"
+webServer.port = 7500
+webServer.user = "admin"
+webServer.password = "admin"
+```
+
+This allows you to:
+- Keep frp traffic within your private Tailscale network
+- Avoid exposing frp server ports to the public internet
+- Leverage Tailscale's built-in authentication and encryption
+- Access your frp server from any device on your tailnet
+
 ### Port Reuse
 
 `vhostHTTPPort` and `vhostHTTPSPort` in frps can use same port with `bindPort`. frps will detect the connection's protocol and handle it correspondingly.
@@ -1211,6 +1238,27 @@ In the above configuration - frps can be contacted on port 1337 with a HTTP CONN
 CONNECT test1 HTTP/1.1\r\n\r\n
 ```
 and the connection will be routed to `proxy1`.
+
+### IP Whitelist for Proxied Services
+
+You can restrict access to your proxied services by specifying allowed IP addresses or CIDR ranges. Only clients from these IP addresses will be able to connect to your proxied service.
+
+```toml
+# frpc.toml
+serverAddr = "x.x.x.x"
+serverPort = 7000
+
+[[proxies]]
+name = "ssh"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 22
+remotePort = 6000
+# Only allow connections from these IP addresses/ranges
+allowedAccessIPs = ["192.168.1.0/24", "10.0.0.5"]
+```
+
+This feature works for all proxy types (TCP, UDP, HTTP, HTTPS, etc.) and helps you secure your services by limiting access to trusted networks or specific IP addresses.
 
 ### Connecting to frps via PROXY
 
