@@ -1,0 +1,17 @@
+# Test config for frpc with dashboard
+serverAddr = "127.0.0.1"
+serverPort = 17000
+
+# Dashboard settings  
+webServer.addr = "127.0.0.1"
+webServer.port = 7400
+webServer.user = "admin"
+webServer.password = "admin"
+
+# Example proxy (you can add more later)
+[[proxies]]
+name = "test-ssh"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 22
+remotePort = 6000

@@ -99,8 +99,6 @@ type BaseProxy struct {
 
 	ipValidator *netpkg.IPValidator
 
-	ipValidator *netpkg.IPValidator
-
 	mu  sync.RWMutex
 	xl  *xlog.Logger
 	ctx context.Context
